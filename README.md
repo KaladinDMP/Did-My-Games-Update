@@ -23,9 +23,13 @@ This script, compiled as an executable (`DidMyGamesUpdate.exe`), checks your Ste
 
 1. Obtain a Steam API key from the [Steam Web API](https://steamcommunity.com/dev/apikey) page.
 2. Create a file named `steam_credentials.txt` in the same directory as the `DidMyGamesUpdate.exe` file.
-3. In the `steam_credentials.txt` file, enter your Steam API key on the first line and your Steam ID on the second line, with nothing else in the file. For example:
-     YOUR_STEAM_API_KEY
-     YOUR_STEAM_ID
+3. In the `steam_credentials.txt` file, enter your Steam API key (30 digit, letters and numbers) on the first line and your Steam User ID (17 numbers) on the second line, with nothing else in the file. 
+
+For example:
+```
+YOUR_STEAM_API_KEY
+YOUR_STEAM_ID
+```
 	 
 4. Save the `steam_credentials.txt` file.
 
