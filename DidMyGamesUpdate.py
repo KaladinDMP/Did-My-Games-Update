@@ -169,7 +169,7 @@ def main():
         logging.info("No updates found.")
 
     logging.info("Script completed.")
-    exit()
+    sys.exit(1)
 
 if __name__ == "__main__":
     main()
