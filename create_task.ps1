@@ -1,7 +1,5 @@
-# Set the path to the executable relative to the script's location
 $exePath = Join-Path $PSScriptRoot "DidMyGamesUpdate.exe"
 
-# Generate the XML task definition
 $xmlDefinition = @"
 <?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
@@ -58,8 +56,8 @@ $xmlDefinition = @"
 </Task>
 "@
 
-# Import the task definition into the Windows Task Scheduler
+# Import the task definition into the Windows Task Scheduler, change the time etc to fit your preferences
 $taskName = "DidMyGamesUpdate"
 $action = New-ScheduledTaskAction -Execute $exePath -WorkingDirectory $PSScriptRoot
-$trigger = New-ScheduledTaskTrigger -Daily -At 3:04am
+$trigger = New-ScheduledTaskTrigger -Daily -At 3:00am
 Register-ScheduledTask -TaskName $taskName -Xml $xmlDefinition -Force
