@@ -1,8 +1,10 @@
 import os
+import sys
 import requests
 import json
 import logging
 import datetime
+import time
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -65,13 +67,19 @@ data_clean = {game['appid']: game['name'] for game in dict}
 def get_name(appid):
     return data_clean.get(appid, "Unknown Game")
 
-def fetch_steam_api_data(appid):
-    try:
-        response = requests.get(f'https://api.steamcmd.net/v1/info/{appid}')
-        data = response.json()
-        return data['data'][str(appid)]['depots']['branches']['public']['buildid']
-    except (KeyError, json.JSONDecodeError):
-        return None
+def fetch_steam_api_data(appid, retries=3, delay=5):
+    for attempt in range(retries):
+        try:
+            response = requests.get(f'https://api.steamcmd.net/v1/info/{appid}')
+            data = response.json()
+            return data['data'][str(appid)]['depots']['branches']['public']['buildid']
+        except (KeyError, json.JSONDecodeError):
+            if attempt < retries - 1:
+                time.sleep(delay)
+                logging.warning(f"Retrying fetch for AppID: {appid} (Attempt {attempt + 1})")
+            else:
+                logging.error(f"Failed to fetch build ID for AppID: {appid} after {retries} attempts.")
+                return None
 
 def load_game_data():
     try:
