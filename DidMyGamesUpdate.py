@@ -1,15 +1,55 @@
+import os
 import requests
 import json
 import logging
 import datetime
 
+# Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# 1. Read API key and Steam ID from a text file
-with open('steam_credentials.txt', 'r') as file:
-    lines = file.readlines()
-    USER_API_KEY = lines[0].strip()
-    USER_STEAM_ID = lines[1].strip()
+# Get the directory where the script/executable is located
+if getattr(sys, 'frozen', False):
+    script_dir = os.path.dirname(sys.executable)
+else:
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Define the paths to the dependent files
+credentials_path = os.path.join(script_dir, 'steam_credentials.txt')
+game_data_path = os.path.join(script_dir, 'game_data.json')
+
+# Function to read or create steam_credentials.txt
+def get_credentials():
+    if os.path.exists(credentials_path):
+        # Read API key and Steam ID from the file
+        with open(credentials_path, 'r') as file:
+            lines = file.readlines()
+            if len(lines) < 2:
+                raise ValueError("Invalid credentials file format.")
+            return lines[0].strip(), lines[1].strip()
+    else:
+        # Prompt the user to enter the API key and Steam ID
+        USER_API_KEY = input("Enter your Steam API key: ").strip()
+        USER_STEAM_ID = input("Enter your Steam ID: ").strip()
+
+        # Save the credentials to the file for future use
+        with open(credentials_path, 'w') as file:
+            file.write(f"{USER_API_KEY}\n")
+            file.write(f"{USER_STEAM_ID}\n")
+
+        return USER_API_KEY, USER_STEAM_ID
+
+# Fetch the credentials
+try:
+    USER_API_KEY, USER_STEAM_ID = get_credentials()
+except ValueError as e:
+    logging.error(str(e))
+    USER_API_KEY = input("Enter your Steam API key: ").strip()
+    USER_STEAM_ID = input("Enter your Steam ID: ").strip()
+
+    # Save the credentials to the file for future use
+    with open(credentials_path, 'w') as file:
+        file.write(f"{USER_API_KEY}\n")
+        file.write(f"{USER_STEAM_ID}\n")
 
 # 2. Fetch owned games
 user_url = f'http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key={USER_API_KEY}&steamid={USER_STEAM_ID}&format=json'
@@ -35,13 +75,13 @@ def fetch_steam_api_data(appid):
 
 def load_game_data():
     try:
-        with open('game_data.json', 'r') as file:
+        with open(game_data_path, 'r') as file:
             return json.load(file)
     except FileNotFoundError:
         return {}
 
 def save_game_data(data):
-    with open('game_data.json', 'w') as file:
+    with open(game_data_path, 'w') as file:
         json.dump(data, file, indent=4)
 
 def check_for_updates():
@@ -103,7 +143,7 @@ def check_for_updates():
 
 def save_updated_games(updated_games, new_games):
     now = datetime.datetime.now()
-    filename = f"newupdated{now.strftime('%m.%d.%Y.%H.%M')}.json"
+    filename = os.path.join(script_dir, f"newupdated{now.strftime('%m.%d.%Y.%H.%M')}.json")
     data = {
         "updated_games": updated_games,
         "new_games": new_games
